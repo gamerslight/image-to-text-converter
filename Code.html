@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image to Text Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e8f4f8; /* Light blue background */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #2c3e50; /* Dark blue-gray */
+    }
+    input[type="file"] {
+      margin-bottom: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #3498db; /* Bright blue border */
+      font-size: 16px;
+      margin-bottom: 20px;
+      resize: none;
+    }
+    button {
+      background-color: #3498db; /* Bright blue */
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #2980b9; /* Darker blue on hover */
+    }
+    .ad {
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #ecf0f1; /* Light gray for ad background */
+      border-radius: 8px;
+      text-align: center;
+      color: #7f8c8d; /* Gray text */
+    }
+    .ad.top {
+      margin-bottom: 20px;
+    }
+    .ad.bottom {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Ad Placement -->
+  <div class="ad top">
+    <p>Advertisement</p>
+    <!-- Replace this with your AdSense code -->
+    <img src="https://via.placeholder.com/728x90.png?text=Ad+Placement" alt="Ad" style="width: 100%; height: auto;">
+  </div>
+
+  <div class="container">
+    <h1>Image to Text Converter</h1>
+    <input type="file" id="imageUpload" accept="image/*" />
+    <p>OR</p>
+    <button id="pasteButton">Paste Image</button>
+    <textarea id="outputText" placeholder="Extracted text will appear here..."></textarea>
+    <button id="copyButton">Copy Text</button>
+  </div>
+
+  <!-- Bottom Ad Placement -->
+  <div class="ad bottom">
+    <p>Advertisement</p>
+    <!-- Replace this with your AdSense code -->
+    <img src="https://via.placeholder.com/728x90.png?text=Ad+Placement" alt="Ad" style="width: 100%; height: auto;">
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+  <script>
+    const imageUpload = document.getElementById('imageUpload');
+    const pasteButton = document.getElementById('pasteButton');
+    const outputText = document.getElementById('outputText');
+    const copyButton = document.getElementById('copyButton');
+
+    // Handle file upload
+    imageUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        processImage(file);
+      }
+    });
+
+    // Handle paste image
+    pasteButton.addEventListener('click', async () => {
+      try {
+        const clipboardItems = await navigator.clipboard.read();
+        for (const item of clipboardItems) {
+          for (const type of item.types) {
+            if (type.startsWith('image/')) {
+              const blob = await item.getType(type);
+              processImage(blob);
+              break;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to read clipboard:', error);
+      }
+    });
+
+    // Process image using Tesseract.js
+    async function processImage(imageFile) {
+      const worker = Tesseract.createWorker();
+      await worker.load();
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
+      const { data: { text } } = await worker.recognize(imageFile);
+      outputText.value = text;
+      await worker.terminate();
+    }
+
+    // Copy text to clipboard
+    copyButton.addEventListener('click', () => {
+      outputText.select();
+      document.execCommand('copy');
+      alert('Text copied to clipboard!');
+    });
+  </script>
+</body>
+</html>
